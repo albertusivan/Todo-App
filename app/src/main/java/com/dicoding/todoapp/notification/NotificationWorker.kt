@@ -38,14 +38,15 @@ class NotificationWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, p
 
     override fun doWork(): Result {
         //TODO 14 : If notification preference on, get nearest active task from repository and show notification with pending intent
+
         val repo = TaskRepository.getInstance(applicationContext)
         val task = repo.getNearestActiveTask()
-        val channelId = "Albert Channel"
+        val nameChannel = channelName
         val message = applicationContext.resources.getString(R.string.notify_content, DateConverter.convertMillisToString(task.dueDateMillis))
 
-        val notificationManagerCompat =
-            applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val builder = NotificationCompat.Builder(applicationContext, channelId)
+        val notificationManagerCompat = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        val builder = NotificationCompat.Builder(applicationContext, nameChannel!!)
             .setSmallIcon(R.drawable.ic_notifications)
             .setContentTitle(task.title)
             .setContentText(message)
@@ -55,11 +56,11 @@ class NotificationWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, p
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                channelId,
+                nameChannel,
                 "channelName",
                 NotificationManager.IMPORTANCE_DEFAULT
             )
-            builder.setChannelId(channelId)
+            builder.setChannelId(nameChannel)
             notificationManagerCompat.createNotificationChannel(channel)
         }
 
@@ -67,8 +68,6 @@ class NotificationWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, p
         notificationManagerCompat.notify(100, notification)
 
         return Result.success()
-
-
     }
 
 }

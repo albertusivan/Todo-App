@@ -36,6 +36,7 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.DialogDateListen
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_save -> {
+
                 //TODO 12 : Create AddTaskViewModel and insert new task to database
                 val factory = ViewModelFactory.getInstance(this)
                 val model = ViewModelProvider(this, factory).get(AddTaskViewModel::class.java)

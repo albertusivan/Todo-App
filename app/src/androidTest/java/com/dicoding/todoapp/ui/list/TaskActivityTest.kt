@@ -1,17 +1,17 @@
 package com.dicoding.todoapp.ui.list
 
 import android.app.Activity
-import androidx.test.espresso.Espresso
-import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.assertion.ViewAssertions
-import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
 import androidx.test.runner.lifecycle.Stage
 import com.dicoding.todoapp.R
 import com.dicoding.todoapp.ui.add.AddTaskActivity
-import junit.framework.TestCase
+import junit.framework.TestCase.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -22,22 +22,16 @@ class TaskActivityTest {
 
     @Test
     fun loadAddTask() {
-        Espresso.onView(ViewMatchers.withId(R.id.rv_task))
-            .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
-        Espresso.onView(ViewMatchers.withId(R.id.fab))
-            .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
-        Espresso.onView(ViewMatchers.withId(R.id.fab)).perform(ViewActions.click())
+        onView(withId(R.id.rv_task)).check(matches(isDisplayed()))
+        onView(withId(R.id.fab)).check(matches(isDisplayed()))
+        onView(withId(R.id.fab)).perform(click())
+
+        onView(withId(R.id.add_ed_title)).check(matches(isDisplayed()))
+        onView(withId(R.id.add_ed_description)).check(matches(isDisplayed()))
+        onView(withId(R.id.add_tv_due_date)).check(matches(isDisplayed()))
 
         val addTask = getAddTaskActivity()
-        TestCase.assertTrue(addTask?.javaClass == AddTaskActivity::class.java)
-
-        Espresso.onView(ViewMatchers.withId(R.id.add_ed_title))
-            .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
-        Espresso.onView(ViewMatchers.withId(R.id.add_ed_description))
-            .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
-        Espresso.onView(ViewMatchers.withId(R.id.add_tv_due_date))
-            .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
-
+        assertTrue(addTask is AddTaskActivity)
     }
 
     private fun getAddTaskActivity(): Activity? {

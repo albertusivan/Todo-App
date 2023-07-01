@@ -39,6 +39,7 @@ class TaskActivity : AppCompatActivity() {
         }
 
         //TODO 6 : Initiate RecyclerView with LayoutManager
+
         val taskRv = findViewById<RecyclerView>(R.id.rv_task).apply {
             layoutManager = LinearLayoutManager(this@TaskActivity)
             setHasFixedSize(true)
@@ -53,6 +54,7 @@ class TaskActivity : AppCompatActivity() {
         taskViewModel.tasks.observe(this, Observer(this::showRecyclerView))
 
         //TODO 15 : Fixing bug : snackBar not show when task completed
+
         TaskAdapter { task, taskCompleate ->
             taskViewModel.completeTask(task, taskCompleate)
             if (taskCompleate) {
