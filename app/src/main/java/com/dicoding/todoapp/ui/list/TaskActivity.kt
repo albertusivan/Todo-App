@@ -54,14 +54,8 @@ class TaskActivity : AppCompatActivity() {
         taskViewModel.tasks.observe(this, Observer(this::showRecyclerView))
 
         //TODO 15 : Fixing bug : snackBar not show when task completed
-
-        TaskAdapter { task, taskCompleate ->
-            taskViewModel.completeTask(task, taskCompleate)
-            if (taskCompleate) {
-                showSnackBar(Event(R.string.task_marked_complete))
-            } else {
-                showSnackBar(Event(R.string.task_marked_active))
-            }
+        taskViewModel.snackbarText.observe(this) {
+            showSnackBar(it)
         }
     }
 

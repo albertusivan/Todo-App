@@ -41,12 +41,10 @@ class NotificationWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, p
 
         val repo = TaskRepository.getInstance(applicationContext)
         val task = repo.getNearestActiveTask()
-        val nameChannel = channelName
         val message = applicationContext.resources.getString(R.string.notify_content, DateConverter.convertMillisToString(task.dueDateMillis))
 
         val notificationManagerCompat = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        val builder = NotificationCompat.Builder(applicationContext, nameChannel!!)
+        val builder = NotificationCompat.Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notifications)
             .setContentTitle(task.title)
             .setContentText(message)
@@ -56,11 +54,11 @@ class NotificationWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, p
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                nameChannel,
-                "channelName",
+                NOTIFICATION_CHANNEL_ID,
+                channelName,
                 NotificationManager.IMPORTANCE_DEFAULT
             )
-            builder.setChannelId(nameChannel)
+            builder.setChannelId(NOTIFICATION_CHANNEL_ID)
             notificationManagerCompat.createNotificationChannel(channel)
         }
 
