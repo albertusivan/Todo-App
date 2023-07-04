@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
+import androidx.preference.PreferenceManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.dicoding.todoapp.R
@@ -39,31 +40,34 @@ class NotificationWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, p
     override fun doWork(): Result {
         //TODO 14 : If notification preference on, get nearest active task from repository and show notification with pending intent
 
-        val repo = TaskRepository.getInstance(applicationContext)
-        val task = repo.getNearestActiveTask()
-        val message = applicationContext.resources.getString(R.string.notify_content, DateConverter.convertMillisToString(task.dueDateMillis))
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        val isNotificationEnabled = sharedPreferences.getBoolean(applicationContext.getString(R.string.pref_key_notify), false)
 
-        val notificationManagerCompat = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val builder = NotificationCompat.Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notifications)
-            .setContentTitle(task.title)
-            .setContentText(message)
-            .setAutoCancel(true)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setContentIntent(getPendingIntent(task))
+        if (isNotificationEnabled) {
+            val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val repository = TaskRepository.getInstance(applicationContext)
+            val nearestActiveTask = repository.getNearestActiveTask()
+            val message = applicationContext.getString(R.string.notify_content, DateConverter.convertMillisToString(nearestActiveTask.dueDateMillis))
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                NOTIFICATION_CHANNEL_ID,
-                channelName,
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
-            builder.setChannelId(NOTIFICATION_CHANNEL_ID)
-            notificationManagerCompat.createNotificationChannel(channel)
+            val notificationBuilder = NotificationCompat.Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
+                .setContentIntent(getPendingIntent(nearestActiveTask))
+                .setSmallIcon(R.drawable.ic_notifications)
+                .setContentTitle(nearestActiveTask.title)
+                .setContentText(String.format(message))
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val notificationChannel = NotificationChannel(
+                    NOTIFICATION_CHANNEL_ID,
+                    channelName,
+                    NotificationManager.IMPORTANCE_DEFAULT
+                )
+                notificationBuilder.setChannelId(NOTIFICATION_CHANNEL_ID)
+                notificationManager.createNotificationChannel(notificationChannel)
+            }
+
+            val notification = notificationBuilder.build()
+            notificationManager.notify(1, notification)
         }
-
-        val notification = builder.build()
-        notificationManagerCompat.notify(100, notification)
 
         return Result.success()
     }

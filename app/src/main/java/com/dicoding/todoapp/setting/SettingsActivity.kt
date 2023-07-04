@@ -5,11 +5,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
+import androidx.work.*
 import com.dicoding.todoapp.R
 import com.dicoding.todoapp.notification.NotificationWorker
+import com.dicoding.todoapp.utils.NOTIFICATION_CHANNEL_ID
 import java.util.concurrent.TimeUnit
 
 class SettingsActivity : AppCompatActivity() {
@@ -35,17 +34,16 @@ class SettingsActivity : AppCompatActivity() {
                 val channelName = getString(R.string.notify_channel_name)
 
                 //TODO 13 : Schedule and cancel daily reminder using WorkManager with data channelName
-                val notificationWorkRequest = PeriodicWorkRequestBuilder<NotificationWorker>(1, TimeUnit.DAYS)
-                    .addTag(channelName)
-                    .build()
-
-                val myWorkManager = WorkManager.getInstance(requireContext())
-                if(newValue as Boolean){
-                    myWorkManager.enqueueUniquePeriodicWork(channelName, ExistingPeriodicWorkPolicy.REPLACE, notificationWorkRequest)
-                }
-                else{
-                    myWorkManager.cancelAllWorkByTag(channelName)
-                    myWorkManager.pruneWork()
+                newValue as Boolean
+                if (newValue) {
+                    val data = Data.Builder().putString(NOTIFICATION_CHANNEL_ID, channelName).build()
+                    val request = PeriodicWorkRequest.Builder(NotificationWorker::class.java, 1, TimeUnit.DAYS)
+                        .setInputData(data)
+                        .addTag(channelName)
+                        .build()
+                    WorkManager.getInstance(requireContext()).enqueue(request)
+                } else {
+                    WorkManager.getInstance(requireContext()).cancelAllWorkByTag(getString(R.string.notify_channel_name))
                 }
                 true
             }
